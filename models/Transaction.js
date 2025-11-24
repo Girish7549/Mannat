@@ -8,7 +8,7 @@ const TransactionSchema = new Schema({
   amount: { type: Number },
   type: {
     type: String,
-    enum: ["task", "referral", "purchase", "withdrawal", "deposit"],
+    enum: ["task", "referral", "purchase", "withdrawal", "deposit", "refund"],
     required: true
   },
   description: { type: String, default: "" },
