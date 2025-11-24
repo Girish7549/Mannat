@@ -89,21 +89,69 @@ exports.updateWithdrawStatus = async (req, res) => {
     const { requestId } = req.params;
     const { status, note } = req.body; // approved / rejected
 
-    if (!["approved", "rejected"].includes(status))
+    if (!["approved", "rejected"].includes(status)) {
       return res.status(400).json({ error: "Invalid status" });
+    }
 
-    const request = await WithdrawalRequest.findById(requestId);
-    if (!request) return res.status(404).json({ error: "Request not found" });
+    // Fetch request
+    const request = await WithdrawalRequest.findById(requestId)
+      .populate("userId"); // Load user details
 
+    if (!request) {
+      return res.status(404).json({ error: "Withdrawal request not found" });
+    }
+
+    // Prevent duplicate processing
+    if (request.status !== "pending") {
+      return res.status(400).json({ error: `This request is already ${request.status}` });
+    }
+
+    // Set admin fields
     request.status = status;
     request.adminNote = note || "";
+    request.updatedAt = new Date();
+
+    // Handle rejected — refund wallet
+    if (status === "rejected") {
+      request.userId.walletBalance += request.amount;
+      await request.userId.save();
+    }
+
+    // Save updated request
     await request.save();
 
-    res.json({ success: true, message: "Request updated", request });
+    res.json({
+      success: true,
+      message: `Withdrawal ${status}`,
+      request
+    });
+
   } catch (err) {
+    console.error("Withdraw Update Error:", err);
     res.status(500).json({ error: "Server error" });
   }
 };
+
+// exports.updateWithdrawStatus = async (req, res) => {
+//   try {
+//     const { requestId } = req.params;
+//     const { status, note } = req.body; // approved / rejected
+
+//     if (!["approved", "rejected"].includes(status))
+//       return res.status(400).json({ error: "Invalid status" });
+
+//     const request = await WithdrawalRequest.findById(requestId);
+//     if (!request) return res.status(404).json({ error: "Request not found" });
+
+//     request.status = status;
+//     request.adminNote = note || "";
+//     await request.save();
+
+//     res.json({ success: true, message: "Request updated", request });
+//   } catch (err) {
+//     res.status(500).json({ error: "Server error" });
+//   }
+// };
 
 
 // exports.getIncomeSummary = async (req, res) => {
