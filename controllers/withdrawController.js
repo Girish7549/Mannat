@@ -93,9 +93,7 @@ exports.updateWithdrawStatus = async (req, res) => {
       return res.status(400).json({ error: "Invalid status" });
     }
 
-    // Fetch request
-    const request = await WithdrawalRequest.findById(requestId)
-      .populate("userId"); // Load user details
+    const request = await WithdrawalRequest.findById(requestId).populate("userId");
 
     if (!request) {
       return res.status(404).json({ error: "Withdrawal request not found" });
@@ -106,31 +104,60 @@ exports.updateWithdrawStatus = async (req, res) => {
       return res.status(400).json({ error: `This request is already ${request.status}` });
     }
 
-    // Set admin fields
+    // Update base fields
     request.status = status;
     request.adminNote = note || "";
     request.updatedAt = new Date();
 
-    // Handle rejected — refund wallet
+    // -----------------------------
+    // REJECTED → Refund + Transaction
+    // -----------------------------
     if (status === "rejected") {
-      request.userId.walletBalance += request.amount;
+      // Refund wallet
+      request.userId.referralWallet += request.amount;
       await request.userId.save();
+
+      // Create refund transaction
+      const refundTx = new Transaction({
+        userId: request.userId._id,
+        amount: request.amount,
+        type: "refund",  // your choice: refund/refunded
+        description: "Withdrawal refund",
+        status: "refunded", // stored as you want
+      });
+
+      await refundTx.save();
     }
 
-    // Save updated request
+    // -----------------------------
+    // APPROVED → Create transaction (optional)
+    // -----------------------------
+    if (status === "approved") {
+      const approvedTx = new Transaction({
+        userId: request.userId._id,
+        amount: -request.amount,
+        type: "withdraw",
+        description: "Withdrawal approved",
+        status: "completed"
+      });
+
+      await approvedTx.save();
+    }
+
     await request.save();
 
     res.json({
       success: true,
       message: `Withdrawal ${status}`,
-      request
+      request,
     });
 
   } catch (err) {
-    console.error("Withdraw Update Error:", err);
+    console.error("Withdrawal update error:", err);
     res.status(500).json({ error: "Server error" });
   }
 };
+
 
 // exports.updateWithdrawStatus = async (req, res) => {
 //   try {
