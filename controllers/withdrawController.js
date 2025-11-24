@@ -136,7 +136,7 @@ exports.updateWithdrawStatus = async (req, res) => {
       const approvedTx = new Transaction({
         userId: request.userId._id,
         amount: -request.amount,
-        type: "withdraw",
+        type: "withdrawal",
         description: "Withdrawal approved",
         status: "completed"
       });
