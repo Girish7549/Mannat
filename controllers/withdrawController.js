@@ -106,6 +106,59 @@ exports.updateWithdrawStatus = async (req, res) => {
 };
 
 
+// exports.getIncomeSummary = async (req, res) => {
+//   try {
+//     const userId = new mongoose.Types.ObjectId(req.user._id);
+
+//     const now = new Date();
+
+//     // Start of Today
+//     const startOfToday = new Date();
+//     startOfToday.setHours(0, 0, 0, 0);
+
+//     // Last 7 Days
+//     const startOfWeek = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+//     // Last 30 Days
+//     const startOfMonth = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+//     // Fetch All User Transactions
+//     const transactions = await Transaction.find({ userId }).sort({ createdAt: -1 });
+//     console.log("ALL Transection :", transactions)
+
+//     let todayIncome = 0;
+//     let weeklyIncome = 0;
+//     let monthlyIncome = 0;
+//     let totalIncome = 0;
+
+//     for (const t of transactions) {
+//       if (t.amount > 0) {
+//         totalIncome += t.amount;
+
+//         if (t.createdAt >= startOfToday) todayIncome += t.amount;
+//         if (t.createdAt >= startOfWeek) weeklyIncome += t.amount;
+//         if (t.createdAt >= startOfMonth) monthlyIncome += t.amount;
+//       }
+//     }
+
+//     res.json({
+//       success: true,
+//       summary: {
+//         todayIncome,
+//         weeklyIncome,
+//         monthlyIncome,
+//         totalIncome,
+//       },
+//       transactions, // 👈 ALL transactions returned here
+//     });
+
+//   } catch (error) {
+//     console.error("Wallet Summary Error:", error);
+//     res.status(500).json({ error: "Server error" });
+//   }
+// };
+
+
 exports.getIncomeSummary = async (req, res) => {
   try {
     const userId = new mongoose.Types.ObjectId(req.user._id);
@@ -122,9 +175,13 @@ exports.getIncomeSummary = async (req, res) => {
     // Last 30 Days
     const startOfMonth = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
-    // Fetch All User Transactions
-    const transactions = await Transaction.find({ userId }).sort({ createdAt: -1 });
-    console.log("ALL Transection :", transactions)
+    // Fetch All User Transactions except purchase
+    const transactions = await Transaction.find({
+      userId,
+      type: { $ne: "purchase" }     // 👈 REMOVE purchase transactions
+    }).sort({ createdAt: -1 });
+
+    console.log("Filtered Transactions (No Purchase):", transactions);
 
     let todayIncome = 0;
     let weeklyIncome = 0;
@@ -149,7 +206,7 @@ exports.getIncomeSummary = async (req, res) => {
         monthlyIncome,
         totalIncome,
       },
-      transactions, // 👈 ALL transactions returned here
+      transactions, // 👈 Now contains NO purchase transactions
     });
 
   } catch (error) {
@@ -157,5 +214,3 @@ exports.getIncomeSummary = async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 };
-
-
