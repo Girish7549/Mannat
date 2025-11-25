@@ -162,7 +162,7 @@ exports.listUsers = async (req, res) => {
       });
     }
 
-    const users = await User.find()
+    const users = await User.find({ type: "user" })
       .populate("parentId", "name")   // shows parent name
       .lean();
 
