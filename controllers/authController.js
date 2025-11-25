@@ -28,15 +28,15 @@ exports.register = async (req, res) => {
     let parent = null;
     let parentId = null;
     let referredBy = null;
-    if (referralCode) {
-      parent = await User.findOne({ referralCode }).session(session);
-      if (!parent) {
-        throw new Error("Invalid referral code");
-      }
+    // if (referralCode) {
+    //   parent = await User.findOne({ referralCode }).session(session);
+    //   if (!parent) {
+    //     throw new Error("Invalid referral code");
+    //   }
 
-      parentId = parent._id;
-      referredBy = parent.referralCode;
-    }
+    //   parentId = parent._id;
+    //   referredBy = parent.referralCode;
+    // }
 
     const code = generateReferralCode();
     const newArr = await User.create([{
