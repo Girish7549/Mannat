@@ -14,7 +14,7 @@ function generateReferralCode() {
 }
 
 exports.register = async (req, res) => {
-  const { name, email, type, phone, password, referralCode } = req.body;
+  const { name, email, phone, password, referralCode } = req.body;
 
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -28,19 +28,19 @@ exports.register = async (req, res) => {
     let parent = null;
     let parentId = null;
     let referredBy = null;
-    // if (referralCode) {
-    //   parent = await User.findOne({ referralCode }).session(session);
-    //   if (!parent) {
-    //     throw new Error("Invalid referral code");
-    //   }
+    if (referralCode) {
+      parent = await User.findOne({ referralCode }).session(session);
+      if (!parent) {
+        throw new Error("Invalid referral code");
+      }
 
-    //   parentId = parent._id;
-    //   referredBy = parent.referralCode;
-    // }
+      parentId = parent._id;
+      referredBy = parent.referralCode;
+    }
 
     const code = generateReferralCode();
     const newArr = await User.create([{
-      name, email, phone, type, password: passwordHash, referralCode: code, referredBy, parentId, level: 0
+      name, email, phone, password: passwordHash, referralCode: code, referredBy, parentId, level: 0
     }], { session });
     const newUser = newArr[0];
 
