@@ -14,7 +14,7 @@ function generateReferralCode() {
 }
 
 exports.register = async (req, res) => {
-  const { name, email, phone, password, referralCode } = req.body;
+  const { name, email, type, phone, password, referralCode } = req.body;
 
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -40,7 +40,7 @@ exports.register = async (req, res) => {
 
     const code = generateReferralCode();
     const newArr = await User.create([{
-      name, email, phone, password: passwordHash, referralCode: code, referredBy, parentId, level: 0
+      name, email, phone, type, password: passwordHash, referralCode: code, referredBy, parentId, level: 0
     }], { session });
     const newUser = newArr[0];
 
