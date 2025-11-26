@@ -49,8 +49,9 @@ const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
 app.get("/", (req, res) => {
-    res.send(`Mannat Backend API is running 🚀 workerPID: ${process.pid},
-        instanceID: ${process.env.NODE_APP_INSTANCE}`);
+    res.send(
+        `Mannat Backend API is running 🚀 <br>` +
+        `Worker PID: ${process.pid} <br>` +
+        `Instance ID: ${process.env.NODE_APP_INSTANCE}`
+    );
 });
-
-
