@@ -6,9 +6,9 @@ exports.submit = async (req, res) => {
   try {
     const user = req.user;
 
-    const { fullName, aadharNumber, panNumber, bankAccount, ifscCode } = req.body;
+    const { fullName, aadharNumber, panNumber, bankName, bankAccount, ifscCode, upi } = req.body;
 
-    const kycData = { fullName, aadharNumber, panNumber, bankAccount, ifscCode };
+    const kycData = { fullName, aadharNumber, panNumber, bankAccount, ifscCode, bankName, upi };
 
     await User.updateOne(
       { _id: user._id },

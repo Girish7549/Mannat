@@ -10,7 +10,7 @@ const UserSchema = new Schema({
   referralCode: { type: String, unique: true, index: true },
   referredBy: { type: String, default: null },
   parentId: { type: Schema.Types.ObjectId, ref: 'User', default: null },
-  type: { type: String, enum: ["user", "admin"] , default: "user"},
+  type: { type: String, enum: ["user", "admin"], default: "user" },
   createdAt: { type: Date, default: Date.now },
 
   referralWallet: { type: Number, default: 0 },
@@ -24,7 +24,9 @@ const UserSchema = new Schema({
     aadharNumber: { type: String },
     panNumber: { type: String },
     bankAccount: { type: String },
-    ifscCode: { type: String }
+    ifscCode: { type: String },
+    bankName: { type: String },
+    upi: { type: String }
   },
   isKycVerified: { type: Boolean, default: false },
   level: { type: Number, default: 0 },

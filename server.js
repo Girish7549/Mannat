@@ -10,6 +10,8 @@ const connectDB = require('./config/db');
 
 const authRoutes = require('./routes/authRoutes');
 const tasksRoutes = require('./routes/tasksRoutes');
+const downloadApkRouted = require('./routes/downloadApkRoutes');
+const announcementRoutes = require('./routes/announcementRoutes');
 const userRoutes = require('./routes/userRoutes');
 const kycRoutes = require('./routes/kycRoutes');
 const withdrawRoutes = require('./routes/withdrawRoutes');
@@ -42,6 +44,8 @@ app.use('/api/transaction', transactionRoutes);
 app.use('/api/withdraw', withdrawRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/download', downloadApkRouted);
+app.use('/api/announcements', announcementRoutes);
 
 app.get('/api/health', (req, res) => res.json({ ok: true }));
 
