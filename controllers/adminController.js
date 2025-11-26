@@ -19,7 +19,7 @@ exports.getAdminDashboardStats = async (req, res) => {
     // -----------------------------
     // USER STATS
     // -----------------------------
-    const totalUsers = await User.countDocuments();
+    const totalUsers = await User.countDocuments({ type: { $ne: "admin" } });
     const paidUsers = await User.countDocuments({ hasPaid: true });
     const pendingKyc = await User.countDocuments({ kycStatus: "pending" });
     const verifiedKyc = await User.countDocuments({ kycStatus: "verified" });
