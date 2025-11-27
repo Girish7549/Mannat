@@ -20,7 +20,7 @@ const WithdrawalRequest = require('../models/WithdrawalRequest');
 exports.getAllWithdrawRequests = async (req, res) => {
   try {
     const list = await WithdrawalRequest.find()
-      .populate("userId", "name upiId referralWallet")
+      .populate("userId")
       .sort({ createdAt: -1 });
 
     res.json({ success: true, list });
@@ -43,10 +43,14 @@ exports.requestWithdraw = async (req, res) => {
     if (!amount || amount < MIN_WITHDRAW)
       return res.status(400).json({ error: `Minimum withdraw ₹${MIN_WITHDRAW}` });
 
-    if (user.referralWallet < amount)
+    if ((user.referralWallet + user.taskWallet) < amount)
       return res.status(400).json({ error: "Insufficient balance" });
 
-    user.referralWallet -= amount;
+    if (user.referralWallet <= 0) {
+      user.taskWallet -= amount
+    } else {
+      user.referralWallet -= amount;
+    }
     await user.save();
 
     const request = await WithdrawalRequest.create({
