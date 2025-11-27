@@ -18,6 +18,8 @@ const withdrawRoutes = require('./routes/withdrawRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const transactionRoutes = require('./routes/transactionRoutes');
+const notificationsRoutes = require("./routes/notificationsRoutes");
+
 
 const app = express();
 
@@ -46,6 +48,8 @@ app.use('/api/payment', paymentRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/download', downloadApkRouted);
 app.use('/api/announcements', announcementRoutes);
+app.use('/api/notifications', notificationsRoutes);
+
 
 app.get('/api/health', (req, res) => res.json({ ok: true }));
 

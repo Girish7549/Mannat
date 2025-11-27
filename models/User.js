@@ -31,7 +31,7 @@ const UserSchema = new Schema({
   isKycVerified: { type: Boolean, default: false },
   level: { type: Number, default: 0 },
   hasPaid: { type: Boolean, default: false },
-
+  expoPushToken: { type: String, default: null },
   active: { type: Boolean, default: true }
 });
 
