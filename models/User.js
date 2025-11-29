@@ -13,6 +13,7 @@ const UserSchema = new Schema({
   type: { type: String, enum: ["user", "admin"], default: "user" },
   createdAt: { type: Date, default: Date.now },
 
+  totalEarning: { type: Number, default: 0 },
   referralWallet: { type: Number, default: 0 },
   taskWallet: { type: Number, default: 0 },
 

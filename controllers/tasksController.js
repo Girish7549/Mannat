@@ -74,7 +74,7 @@ exports.complete = async (req, res) => {
       meta: { ip: req.ip, ua: req.headers['user-agent'] }
     }], { session });
 
-    await User.updateOne({ _id: user._id }, { $inc: { taskWallet: task.rewardAmount } }, { session });
+    await User.updateOne({ _id: user._id }, { $inc: { taskWallet: task.rewardAmount, totalEarning: task.rewardAmount } }, { session });
     await Transaction.create([{
       userId: user._id,
       amount: task.rewardAmount,
