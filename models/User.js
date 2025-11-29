@@ -18,6 +18,7 @@ const UserSchema = new Schema({
   taskWallet: { type: Number, default: 0 },
 
   totalReferrals: { type: Number, default: 0 },
+  totalReferralsPaid: { type: Number, default: 0 },
 
   kycStatus: { type: String, enum: ['not_submitted', 'pending', 'verified', 'rejected'], default: 'not_submitted' },
   kycFiles: {
