@@ -32,3 +32,31 @@ exports.getAllTransactions = async (req, res) => {
         res.status(500).json({ error: "Server Error" });
     }
 };
+
+exports.deleteTransaction = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const txn = await Transaction.findById(id);
+        if (!txn) {
+            return res.status(404).json({
+                success: false,
+                message: "Transaction not found",
+            });
+        }
+
+        await Transaction.findByIdAndDelete(id);
+
+        return res.json({
+            success: true,
+            message: "Transaction deleted successfully",
+        });
+
+    } catch (error) {
+        console.error("Delete Transaction Error:", error);
+        res.status(500).json({
+            success: false,
+            message: "Server error",
+        });
+    }
+};
