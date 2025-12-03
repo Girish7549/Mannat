@@ -1,39 +1,131 @@
+// const User = require("../models/User");
+
+// const COMMISSIONS = [300, 100, 50, 10, 5];
+
+// async function buildTree(userId, level = 0) {
+//     const user = await User.findById(userId).lean();
+//     if (!user) return null;
+
+//     const children = await User.find({ referredBy: user.referralCode }).lean();
+
+//     let totalNetwork = 0;
+//     let totalEarnings = 0;
+//     const childNodes = [];
+
+//     for (const child of children) {
+//         const nextLevel = level + 1;
+
+//         // Assign commission only for levels 1–5
+//         const commission =
+//             nextLevel <= 5 ? COMMISSIONS[nextLevel - 1] : 0;
+
+//         totalEarnings += commission;
+
+//         // Build subtree
+//         const childTree = await buildTree(child._id, nextLevel);
+
+//         // Create child node
+//         const nodeObj = {
+//             id: child._id,
+//             name: child.name,
+//             level: nextLevel,
+//             isPaid: child.hasPaid,
+//             commission,
+//             children: childTree ? childTree.tree.children : []
+//         };
+
+//         // Update totals based on childTree
+//         if (childTree) {
+//             totalNetwork += 1 + childTree.totalNetwork;
+//             totalEarnings += childTree.totalEarnings;
+//         } else {
+//             totalNetwork += 1;
+//         }
+
+//         // PUSH ONLY ONCE (IMPORTANT FIX)
+//         childNodes.push(nodeObj);
+//     }
+
+//     const tree = {
+//         id: user._id,
+//         name: user.name,
+//         level,
+//         isPaid: user.hasPaid,
+//         commission: 0,       // root user has no commission
+//         children: childNodes
+//     };
+
+//     return { tree, totalNetwork, totalEarnings };
+// }
+
 const User = require("../models/User");
 
-// Recursively build tree
+const COMMISSIONS = [300, 100, 50, 10, 5];
+
 async function buildTree(userId, level = 0) {
     const user = await User.findById(userId).lean();
     if (!user) return null;
 
-    // Get children (users referred by THIS user)
     const children = await User.find({ referredBy: user.referralCode }).lean();
 
-    const childNodes = [];
     let totalNetwork = 0;
-    let totalEarnings = user.referralWallet || 0;
+    let totalEarnings = 0;
+    const childNodes = [];
 
     for (const child of children) {
-        const childTree = await buildTree(child._id, level + 1);
+        const nextLevel = level + 1;
 
-        if (childTree) {
-            totalNetwork += 1 + childTree.totalNetwork;
-            totalEarnings += childTree.totalEarnings;
-            childNodes.push(childTree.tree);
+        // Base commission by level (1–5)
+        let commission = nextLevel <= 5 ? COMMISSIONS[nextLevel - 1] : 0;
+
+        // ❌ Do NOT count earnings if NOT paid
+        if (!child.hasPaid) {
+            commission = 0;
         }
+
+        // Add commission only if paid
+        totalEarnings += commission;
+
+        // Build subtree
+        const childTree = await buildTree(child._id, nextLevel);
+
+        // Count network only if child hasPaid
+        if (child.hasPaid) {
+            totalNetwork += 1;
+        }
+
+        // Add children's paid network too
+        if (childTree) {
+            totalNetwork += childTree.totalNetwork;
+            totalEarnings += childTree.totalEarnings;
+        }
+
+        // Build node
+        const nodeObj = {
+            id: child._id,
+            name: child.name,
+            level: nextLevel,
+            isPaid: child.hasPaid,
+            commission, // 0 if unpaid
+            children: childTree ? childTree.tree.children : []
+        };
+
+        childNodes.push(nodeObj);
     }
 
-    // Build correct node data
     const tree = {
         id: user._id,
-        name: user.name,                  // ✅ Correct user name
-        directReferrals: children.length, // ✅ Correct count
-        earnings: user.referralWallet,    // ✅ Each user's earnings
+        name: user.name,
         level,
+        isPaid: user.hasPaid,
+        commission: 0, // root
         children: childNodes
     };
 
     return { tree, totalNetwork, totalEarnings };
 }
+
+
 
 
 // MAIN CONTROLLER
