@@ -160,7 +160,7 @@ async function buildUserTree(userId) {
     if (!user) return null;
 
     // Find all direct children (referrals)
-    const children = await User.find({ parentId: userId, hasPaid: true }).lean();
+    const children = await User.find({ parentId: userId }).lean();
 
     // Recursively build subtree for each child
     const childTrees = await Promise.all(
