@@ -152,3 +152,52 @@ exports.getReferralNetwork = async (req, res) => {
         return res.status(500).json({ success: false, message: "Server error" });
     }
 };
+
+// Recursive function to build tree
+async function buildUserTree(userId) {
+    const user = await User.findById(userId).lean();
+
+    if (!user) return null;
+
+    // Find all direct children (referrals)
+    const children = await User.find({ parentId: userId }).lean();
+
+    // Recursively build subtree for each child
+    const childTrees = await Promise.all(
+        children.map(child => buildUserTree(child._id))
+    );
+
+    return {
+        ...user,
+        children: childTrees
+    };
+}
+
+// Controller: Get full referral tree of user
+exports.getUserTree = async (req, res) => {
+    try {
+        const userId = req.params.userId;
+
+        const tree = await buildUserTree(userId);
+
+        if (!tree) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            tree
+        });
+    } catch (error) {
+        console.error("Tree Error:", error);
+        res.status(500).json({
+            success: false,
+            message: "Internal server error",
+            error
+        });
+    }
+};
+

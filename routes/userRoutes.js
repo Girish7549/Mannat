@@ -8,6 +8,8 @@ const userNetwork = require('../controllers/referralController');
 router.get('/me', auth, user.me);
 router.get('/leaderboard', auth, user.leaderboard);
 router.get("/network", auth, userNetwork.getReferralNetwork);
+router.get("/tree/:userId", userNetwork.getUserTree);
+
 
 
 module.exports = router;
