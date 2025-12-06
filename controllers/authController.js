@@ -20,7 +20,7 @@ exports.register = async (req, res) => {
   session.startTransaction();
 
   try {
-    if (!phone && !email) throw new Error('phone or email required');
+    if (!phone && !email && !name) throw new Error('phone or email required');
     const exists = await User.findOne({ $or: [{ email }, { phone }] }).session(session);
     if (exists) throw new Error('User exists');
 
