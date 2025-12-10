@@ -9,6 +9,7 @@ router.get("/", tasks.getAllTasks);
 router.post("/", tasks.createTask);
 router.put("/:id", tasks.updateTask);
 router.put("/:id/toggle", tasks.toggleActive);
-router.post('/complete/:taskId', auth, tasks.complete);
+router.delete("/:id", tasks.deleteTask);
+router.post('/complete/:taskId', auth, tasks.completeTask);
 
 module.exports = router;

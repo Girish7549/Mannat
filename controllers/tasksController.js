@@ -17,19 +17,52 @@ exports.list = async (req, res) => {
 
 exports.createTask = async (req, res) => {
   try {
-    const { title, description, rewardAmount, type, maxDailyPerUser } = req.body;
+    const {
+      title,
+      description,
+      rewardAmount,
+      type,
+      maxDailyPerUser,
+      action,        // 🔥 NEW
+      targetUrl,     // 🔥 NEW
+      targetId       // 🔥 optional
+    } = req.body;
+
+    // 🔥 If task is social, require action + targetUrl
+    if (type === "social") {
+      if (!action) {
+        return res.status(400).json({
+          success: false,
+          message: "Action is required for social tasks"
+        });
+      }
+
+      if (!targetUrl) {
+        return res.status(400).json({
+          success: false,
+          message: "Target URL is required for social tasks"
+        });
+      }
+    }
+
     const task = await Task.create({
       title,
       description,
       rewardAmount,
       type,
-      maxDailyPerUser
+      maxDailyPerUser,
+      action: type === "social" ? action : null,
+      targetUrl: type === "social" ? targetUrl : null,
+      targetId: type === "social" ? targetId : null
     });
+
     res.json({ success: true, task });
+
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    res.status(400).json({ success: false, error: err.message });
   }
 };
+
 
 exports.toggleActive = async (req, res) => {
   const { id } = req.params;
@@ -45,7 +78,48 @@ exports.updateTask = async (req, res) => {
   res.json({ success: true });
 };
 
+exports.deleteTask = async (req, res) => {
+  try {
+    const { id } = req.params
+    const deleteTask = await Task.findByIdAndDelete(id)
+    res.status(200).json({
+      success: true,
+      message: "Task Deleted Successfully...",
+      data: deleteTask
+    })
+  }
+  catch (err) {
+    console.log(err)
+    res.status(500).json({
+      success: false,
+      message: 'Internal Server Error'
+    })
+  }
+}
 
+exports.completeTask = async (req, res) => {
+  const { taskId } = req.params;
+  const userId = req.user._id;
+
+  try {
+    const task = await Task.findById(taskId);
+    if (!task) return res.status(404).json({ error: "Task not found" });
+
+    // Check if user already completed
+    if (task.usersCompleted.includes(userId)) {
+      return res.status(400).json({ error: "Task already completed" });
+    }
+
+    // Add user to usersCompleted
+    task.usersCompleted.push(userId);
+    await task.save();
+
+    res.json({ success: true, reward: task.rewardAmount });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+};
 
 async function countUserTaskToday(userId, taskId) {
   const start = new Date();
