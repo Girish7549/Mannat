@@ -1,6 +1,8 @@
 
 const User = require('../models/User');
 const Transaction = require('../models/Transaction');
+const bcrypt = require('bcryptjs');
+const mongoose = require('mongoose');
 
 // exports.me = async (req, res) => {
 //   const user = await User.findById(req.user._id)
@@ -40,3 +42,47 @@ exports.leaderboard = async (req, res) => {
   const top = await User.find().sort({ totalReferrals: -1 }).limit(10).lean();
   res.json({ leaderboard: top });
 };
+
+exports.updateEmailPassword = async (req, res) => {
+  const userId = req.params.id;
+  const { email, password } = req.body;
+
+  // 🔒 only admin or same user
+  if (req.user.role !== 'admin' && req.user._id.toString() !== userId.toString()) {
+    return res.status(403).json({ error: 'Not authorized' });
+  }
+
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const user = await User.findById(userId).session(session);
+    if (!user) throw new Error('User not found');
+
+    // 📧 Email update (unique check)
+    if (email && email !== user.email) {
+      const exists = await User.findOne({ email }).session(session);
+      if (exists) throw new Error('Email already in use');
+      user.email = email;
+    }
+
+    // 🔑 Password update
+    if (password) {
+      user.password = await bcrypt.hash(password, 10);
+    }
+
+    await user.save({ session });
+
+    await session.commitTransaction();
+    session.endSession();
+
+    res.json({
+      message: 'Email / Password updated successfully'
+    });
+  } catch (err) {
+    await session.abortTransaction();
+    session.endSession();
+    res.status(400).json({ error: err.message || 'Update failed' });
+  }
+};
+

@@ -9,6 +9,7 @@ router.get('/me', auth, user.me);
 router.get('/leaderboard', auth, user.leaderboard);
 router.get("/network", auth, userNetwork.getReferralNetwork);
 router.get("/tree/:userId", userNetwork.getUserTree);
+router.put("/password-update/:id", auth, user.updateEmailPassword);
 
 
 

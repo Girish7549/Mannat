@@ -6,8 +6,8 @@ const uploadBufferToCloudinary = (buffer, originalname) => {
             {
                 folder: "mannat/paymentProofs",
                 use_filename: true,
-                public_id: originalname.split(".")[0],
-                unique_filename: false,
+                public_id: `${originalname.split(".")[0]}_${Date.now()}`,
+                unique_filename: true,
                 resource_type: "image",
             },
             (error, result) => {
