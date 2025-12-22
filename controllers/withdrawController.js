@@ -35,7 +35,7 @@ exports.requestWithdraw = async (req, res) => {
     const user = await User.findById(req.user._id);
     const { amount } = req.body;
 
-    const MIN_WITHDRAW = 1;
+    const MIN_WITHDRAW = 3000;
 
     if (!user.isKycVerified)
       return res.status(400).json({ error: "KYC not verified" });
