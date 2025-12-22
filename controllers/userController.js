@@ -48,7 +48,7 @@ exports.updateEmailPassword = async (req, res) => {
   const { email, password } = req.body;
 
   // 🔒 only admin or same user
-  if (req.user.role !== 'admin' && req.user._id.toString() !== userId.toString()) {
+  if (req.user.type !== 'admin' && req.user._id.toString() !== userId.toString()) {
     return res.status(403).json({ error: 'Not authorized' });
   }
 
