@@ -68,7 +68,8 @@ exports.listPendingProofs = async (req, res) => {
 exports.AllPaymentProofs = async (req, res) => {
     try {
         const proofs = await PaymentProof.find()
-            .populate("userId");
+            .populate("userId")
+            .populate("paymentAccount");
 
         res.json({ success: true, proofs });
     } catch (err) {
