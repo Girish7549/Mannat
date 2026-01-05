@@ -6,6 +6,7 @@ const auth = require('../middleware/auth');
 
 // NOTE: In production add admin auth/role check
 router.get('/users', auth, admin.listUsers);
+router.delete("/user/:userId", auth, admin.deleteUser);
 router.get("/kyc/list", auth, admin.listKycUsers);
 router.post("/kyc/approve", auth, admin.approveKyc);
 router.post("/kyc/reject", auth, admin.rejectKyc);

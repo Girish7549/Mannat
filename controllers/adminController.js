@@ -6,6 +6,7 @@ const Purchase = require('../models/Purchase');
 const UserTask = require('../models/UserTask');
 const PaymentProof = require('../models/PaymentProof');
 const WithdrawalRequest = require('../models/WithdrawalRequest');
+const { default: mongoose } = require('mongoose');
 
 exports.getAdminDashboardStats = async (req, res) => {
   try {
@@ -197,6 +198,52 @@ exports.listUsers = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Server error"
+    });
+  }
+};
+
+exports.deleteUser = async (req, res) => {
+  try {
+
+    if (req.user.type !== "admin") {
+      return res.status(401).json({
+        success: false,
+        message: "You have no permission to access"
+      });
+    }
+
+    const { userId } = req.params;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    const childCount = await User.countDocuments({ parentId: userId });
+
+    if (childCount > 0) {
+      return res.status(400).json({
+        success: false,
+        message:
+          'You cannot delete this user because some users already have this user as their parentId'
+      });
+    }
+
+    await User.findByIdAndDelete(userId);
+
+    return res.status(200).json({
+      success: true,
+      message: 'User deleted successfully'
+    });
+
+  } catch (error) {
+    console.error('Delete User Error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error'
     });
   }
 };
