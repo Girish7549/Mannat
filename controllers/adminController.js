@@ -163,7 +163,7 @@ exports.listUsers = async (req, res) => {
       });
     }
 
-    const users = await User.find({ type: "user" })
+    const users = await User.find({ type: "user", hasPaid: true })
       .populate("parentId", "name")   // shows parent name
       .lean()
       .sort({ createdAt: -1 });
